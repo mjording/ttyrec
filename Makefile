@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -O2
+CFLAGS = -O2 -DSVR4
 VERSION = 1.0.8
 
 TARGET = ttyrec ttyplay ttytime
