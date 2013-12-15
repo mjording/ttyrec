@@ -1,5 +1,10 @@
 CC = gcc
-CFLAGS = -O2 -DSVR4
+CFLAGS = -O2
+OS = $(shell uname -a)
+ifeq ($(findstring Ubuntu,$(OS)),Ubuntu)
+	CFLAGS += -DSVR4
+endif
+
 VERSION = 1.0.8
 
 TARGET = ttyrec ttyplay ttytime
