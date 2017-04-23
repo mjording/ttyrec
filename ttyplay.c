@@ -35,9 +35,14 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <unistd.h>
+#ifdef USE_CURSES
+#include <curses.h>
+#else
 #include <termios.h>
+#endif
 #include <sys/time.h>
 #include <string.h>
+#include <signal.h>
 
 #include "ttyrec.h"
 #include "io.h"
@@ -258,6 +263,57 @@ input_from_stdin (void)
     return efdopen(fd, "r");
 }
 
+#ifdef USE_CURSES
+void
+initcurses ()
+{
+  const char *defterm = "xterm";
+  int utf8esc = 1; /* bool */
+  printf("\033[2J");
+  if (!getenv("TERM")) setenv("TERM", defterm, 1);
+  initscr();
+  cbreak ();
+  noecho ();
+  nonl ();
+  intrflush (stdscr, FALSE);
+  keypad (stdscr, TRUE);
+#define USE_NCURSES_COLOR
+#ifdef USE_NCURSES_COLOR
+  start_color();
+  use_default_colors();
+
+  init_pair(COLOR_BLACK, COLOR_WHITE, COLOR_BLACK);
+  init_pair(COLOR_RED, COLOR_RED, COLOR_BLACK);
+  init_pair(COLOR_GREEN, COLOR_GREEN, COLOR_BLACK);
+  init_pair(COLOR_YELLOW, COLOR_YELLOW, COLOR_BLACK);
+  init_pair(COLOR_BLUE, COLOR_BLUE, COLOR_BLACK);
+  init_pair(COLOR_MAGENTA, COLOR_MAGENTA, COLOR_BLACK);
+  init_pair(COLOR_CYAN, COLOR_CYAN, COLOR_BLACK);
+  init_pair(COLOR_WHITE, COLOR_WHITE, COLOR_BLACK);
+  init_pair(9, 0, COLOR_BLACK);
+  init_pair(10, COLOR_BLACK, COLOR_BLACK);
+  init_pair(11, -1, -1);
+
+  if (utf8esc) (void) write(1, "\033%G", 3);
+#endif
+  clear();
+  refresh();
+}
+#else
+static struct termios old, new;
+#endif
+
+void
+interrupt(int n)
+{
+#ifdef USE_CURSES
+    endwin();
+#else
+    tcsetattr(0, TCSANOW, &old);  /* Return terminal state */
+#endif
+    exit(n);
+}
+
 int 
 main (int argc, char **argv)
 {
@@ -266,7 +322,6 @@ main (int argc, char **argv)
     WaitFunc wait_func  = ttywait;
     ProcessFunc process = ttyplayback;
     FILE *input = NULL;
-    struct termios old, new;
 
     set_progname(argv[0]);
     while (1) {
@@ -299,14 +354,23 @@ main (int argc, char **argv)
         input = input_from_stdin();
     }
     assert(input != NULL);
-
+#ifndef USE_CURSES
     tcgetattr(0, &old); /* Get current terminal state */
     new = old;          /* Make a copy */
     new.c_lflag &= ~(ICANON | ECHO | ECHONL); /* unbuffered, no echo */
+    new.c_cc[VMIN] = 1;
+    new.c_cc[VTIME] = 0;
     tcsetattr(0, TCSANOW, &new); /* Make it current */
-
+#else
+    initcurses();
+#endif
+    signal(SIGINT,interrupt);
     process(input, speed, read_func, wait_func);
+#ifdef USE_CURSES
+    endwin();
+#else
     tcsetattr(0, TCSANOW, &old);  /* Return terminal state */
+#endif
 
     return 0;
 }

@@ -1,6 +1,9 @@
 CC = gcc
-CFLAGS = -O2
+CFLAGS = -O2 -DSVR4
 VERSION = 1.0.8
+#For curses (ttyplay only): 
+CFLAGS += -DUSE_CURSES
+LIBS = -lcurses
 
 TARGET = ttyrec ttyplay ttytime
 
@@ -13,7 +16,7 @@ ttyrec: ttyrec.o io.o
 	$(CC) $(CFLAGS) -o ttyrec ttyrec.o io.o
 
 ttyplay: ttyplay.o io.o
-	$(CC) $(CFLAGS) -o ttyplay ttyplay.o io.o
+	$(CC) $(CFLAGS) -o ttyplay ttyplay.o io.o $(LIBS)
 
 ttytime: ttytime.o io.o
 	$(CC) $(CFLAGS) -o ttytime ttytime.o io.o
