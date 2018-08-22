@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -O2
+CFLAGS = -O2 -DHAVE_openpty
 VERSION = 1.0.8
 
 TARGET = ttyrec ttyplay ttytime
@@ -10,7 +10,7 @@ DIST =	ttyrec.c ttyplay.c ttyrec.h io.c io.h ttytime.c\
 all: $(TARGET)
 
 ttyrec: ttyrec.o io.o
-	$(CC) $(CFLAGS) -o ttyrec ttyrec.o io.o
+	$(CC) $(CFLAGS) -o ttyrec ttyrec.o io.o -lutil
 
 ttyplay: ttyplay.o io.o
 	$(CC) $(CFLAGS) -o ttyplay ttyplay.o io.o
