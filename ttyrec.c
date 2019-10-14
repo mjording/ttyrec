@@ -71,7 +71,12 @@
 #define _(FOO) FOO
 
 #ifdef HAVE_openpty
+#if defined(__APPLE__)
+#include <util.h>
+#include <signal.h>
+#else
 #include <libutil.h>
+#endif
 #endif
 
 #if defined(SVR4) && !defined(CDEL)

@@ -8,6 +8,10 @@ or if your system is SVR4 system (Solaris etc.),
 
   % make CFLAGS=-DSVR4
 
+or if your system supports openpty(3) (MacOS X etc.),
+
+  % make CFLAGS=-DHAVE_openpty
+
 or if your system supports getpt(3),
 
   % make CFLAGS=-DHAVE_getpt
