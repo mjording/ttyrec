@@ -71,7 +71,9 @@
 #define _(FOO) FOO
 
 #ifdef HAVE_openpty
-#include <libutil.h>
+/* #include <libutil.h> */
+#include <pty.h>  /* for openpty and forkpty */
+#include <utmp.h> /* for login_tty */
 #endif
 
 #if defined(SVR4) && !defined(CDEL)
