@@ -57,7 +57,9 @@
 
 #if defined(SVR4)
 #include <fcntl.h>
+#if (!defined(__GLIBC__) || __GLIBC__ < 2) && (!defined(__GLIBC_MINOR__) || __GLIBC_MINOR__ < 30)
 #include <stropts.h>
+#endif
 #endif /* SVR4 */
 
 #include <sys/time.h>
@@ -203,11 +205,7 @@ doinput()
 void
 finish()
 {
-#if defined(SVR4)
 	int status;
-#else /* !SVR4 */
-	union wait status;
-#endif /* !SVR4 */
 	register int pid;
 	register int die = 0;
 
@@ -449,6 +447,7 @@ getslave()
 		perror("open(fd, O_RDWR)");
 		fail();
 	}
+#if (!defined(__GLIBC__) || __GLIBC__ < 2) && (!defined(__GLIBC_MINOR__) || __GLIBC_MINOR__ < 30)
 	if (isastream(slave)) {
 		if (ioctl(slave, I_PUSH, "ptem") < 0) {
 			perror("ioctl(fd, I_PUSH, ptem)");
@@ -463,6 +462,9 @@ getslave()
 			perror("ioctl(fd, I_PUSH, ttcompat)");
 			fail();
 		}
+#endif
+#else
+    {
 #endif
 		(void) ioctl(0, TIOCGWINSZ, (char *)&win);
 	}
