@@ -1,6 +1,9 @@
 CC = gcc
 CFLAGS = -O2
 VERSION = 1.0.8
+ifneq ($(findstring Linux,$(shell uname -s)),)
+CFLAGS += -D_GNU_SOURCE -DSVR4
+endif
 
 TARGET = ttyrec ttyplay ttytime
 
